@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javaer.modules.generator.mapper.GenTableMapper">
+
+
+	<!--查询数据库下面的表-->
+	<select id="getTables" resultType="com.javaer.modules.generator.entity.GenTable">
+		select
+			table_name as "tableName",
+			create_time ,
+			engine,
+			table_collation,
+			table_comment as "tableComment"
+		from information_schema.tables
+        where table_schema = (select database())
+        order by create_time desc
+	</select>
+
+
+	<!--查询数据库表下面的列属性-->
+	<select id="getColumns" resultType="com.javaer.modules.generator.entity.GenTableColumn">
+        SELECT
+        COLUMN_NAME as columnName,
+        COLUMN_key ,
+        DATA_TYPE as columnType,
+        COLUMN_COMMENT as columnComment
+        FROM information_schema.COLUMNS
+        WHERE
+        	TABLE_SCHEMA = (select database())
+         	AND TABLE_NAME = #{tableName}
+    </select>
+
+
+	<update id="createTable">
+		CREATE TABLE IF NOT EXISTS ${tableName}(
+			`id` varchar(64) PRIMARY KEY COMMENT '主键',
+			`create_date` DATE COMMENT '创建时间'
+		)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT #{tableComment}
+	</update>
+
+	<update id="updateTable">
+		alter table ${tableName} rename to ${newTableName};
+	</update>
+
+	<update id="deleteTable">
+		drop table ${tableName}
+	</update>
+</mapper>
